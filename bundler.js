@@ -28,7 +28,7 @@ const moduleAnalyser = (filename) => {
         }
     });
     console.log(dependencies);
-    //将抽象语法树转化成对象
+    //将抽象语法树转化成浏览器可运行的代码
     const {code} = babel.transformFromAst(ast,null,{
         presets:["@babel/preset-env"]
     });
