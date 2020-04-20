@@ -69,8 +69,39 @@ const makeDependenciesGraph = (entry) => {
     return graph;
 }
 
-// const moduleInfor =  moduleAnalyser('./src/index.js');
-// console.log(moduleInfor);
+
+const generateCode = (entry) => {
+    //利用JSON.stringify将对象参数转化为字符串参数
+    const graph = JSON.stringify(makeDependenciesGraph(entry));
+    //生成浏览器可运行的代码（字符串）。整个代码运行在一个闭包里，里面定义了require函数，及exports对象
+    return `
+        (function(graph){
+         
+            function require(module){      
+                function localRequire(relativePath){
+                    return require(graph[module].dependencies[relativePath]);            
+                }       
+            
+                var exports = {};
+
+                (function(require,exports,code){
+                    eval(code)
+                })(localRequire,exports,graph[module].code);
+                return exports;
+
+            };
+            require('${entry}')
+        })(${graph})
+    `;
+}
+
+const moduleInfor = moduleAnalyser('./src/index.js');
+console.log(moduleInfor);
 
 const graphInfo = makeDependenciesGraph('./src/index.js');
 console.log(graphInfo);
+
+const code = generateCode('./src/index.js');
+console.log(code);
+
+//将code复制粘贴到浏览器控制台，输出say hello
